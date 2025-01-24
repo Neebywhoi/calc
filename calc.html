@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: white;
+        }
+        .calculator-container {
+            background-color: #e0ffe0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 15px;
+        }
+         .input-group {
+             display: flex;
+              width: 100%;
+            justify-content: space-between;
+             margin-bottom: 20px;
+          }
+        .input-container {
+           position: relative;
+           width: 38%; /* Занимают почти всю ширину*/
+        }
+          input[type="number"] {
+            background-color: #e0ffe0;
+            padding: 10px;
+            border: 1px dashed red;
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
+           font-size: 16px;
+            color: red;
+            text-align: left;
+          }
+          input[type="number"].error {
+              border: 2px solid red;
+        }
+          input[type="number"]:focus {
+              outline: none;
+                border: 1px dashed red; /* Красная рамка при фокусе */
+           }
+         .error-message {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 2px);
+             color: red;
+             font-size: 0.8rem;
+           }
+           select {
+            background-color: #e0ffe0;
+            padding: 10px;
+             border: 1px dashed red;
+             border-radius: 15px;
+            font-size: 16px;
+              color: red;
+           }
+         select option {
+               color: red;
+         }
+         select:focus {
+            outline: none;
+        }
+          button {
+             padding: 10px 20px;
+             background-color: transparent;
+            border: 1px dashed red;
+             border-radius: 15px;
+             cursor: pointer;
+            font-size: 16px;
+             margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+            color: red;
+          }
+         button:hover {
+           background-color: white;
+         }
+        #result {
+             width: 100%;
+            background-color: #e0ffe0;
+             padding: 10px;
+            border: 1px dashed red;
+            border-radius: 15px;
+            text-align: left;
+             box-sizing: border-box;
+            font-size: 18px;
+            min-height: 70px;
+            white-space: pre-wrap;
+            color: red;
+        }
+          .previous-operation {
+            color: #ff4c5b;
+            font-size: 1rem;
+          }
+           @media (max-width: 600px) {
+            .input-group {
+               flex-direction: column;
+            }
+            .input-container {
+               width: 100%; /* инпуты занимают 100% ширины */
+           }
+           input[type="number"] {
+             margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="input-group">
+            <div class="input-container">
+              <input type="number" id="num1" placeholder="Число 1">
+              <div class="error-message" id="num1Error"></div>
+            </div>
+           <select id="operation">
+             <option value="+">+</option>
+             <option value="-">-</option>
+             <option value="*">*</option>
+             <option value="/">/</option>
+            </select>
+            <div class="input-container">
+                <input type="number" id="num2" placeholder="Число 2">
+                <div class="error-message" id="num2Error"></div>
+             </div>
+        </div>
+       <button onclick="calculate()">Подсчитать</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const num1Input = document.getElementById('num1');
+        const num2Input = document.getElementById('num2');
+        const operationSelect = document.getElementById('operation');
+         const resultDiv = document.getElementById('result');
+         const num1Error = document.getElementById('num1Error');
+        const num2Error = document.getElementById('num2Error');
+         let previousCalculations = [];
+
+        function calculate() {
+           num1Error.innerText = "";
+          num2Error.innerText = "";
+            num1Input.classList.remove('error');
+          num2Input.classList.remove('error');
+            const num1 = parseFloat(num1Input.value);
+             const num2 = parseFloat(num2Input.value);
+             const operation = operationSelect.value;
+            if (isNaN(num1)) {
+              num1Error.innerText = "Введите число";
+                num1Input.classList.add('error');
+                 return;
+            }
+            if (isNaN(num2)) {
+                num2Error.innerText = "Введите число";
+                num2Input.classList.add('error');
+               return;
+            }
+            let result;
+           try {
+                switch (operation) {
+                  case '+':
+                       result = num1 + num2;
+                       break;
+                     case '-':
+                       result = num1 - num2;
+                        break;
+                  case '*':
+                       result = num1 * num2;
+                       break;
+                   case '/':
+                        if (num2 === 0) {
+                           throw new Error("Деление на ноль");
+                       }
+                        result = num1 / num2;
+                       break;
+                    default:
+                        throw new Error("Неверная операция")
+                }
+                const calculationString = `<span style="color: red;">${num1}</span> <span style="color: red;">${operation}</span> <span style="color: red;">${num2}</span> = <span style="color: red;">${result}</span>`;
+                previousCalculations.unshift(calculationString); // Добавляем новый расчет в начало массива
+               if (previousCalculations.length > 3) { // ограничиваем количество выводимых операций
+                    previousCalculations.pop();
+               }
+
+               let formattedResult = '';
+               for (let i = 0; i < previousCalculations.length; i++) {
+                    if (i === 0) {
+                       formattedResult += previousCalculations[i];
+                   }
+                     else{
+                       formattedResult += `<br><span class="previous-operation">${previousCalculations[i]}</span>`;
+                  }
+              }
+               resultDiv.innerHTML = formattedResult;
+            }
+            catch (error) {
+              resultDiv.innerHTML = `<span style="color: red;">Ошибка: ${error.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
